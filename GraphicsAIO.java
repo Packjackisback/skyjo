@@ -1,19 +1,24 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
-
+import javax.swing.UIManager;
+import com.formdev.flatlaf.FlatLightLaf;
 public class GraphicsAIO {
     private static JFrame mainFrame;
     private JLabel headerLabel;
     private JLabel statusLabel;
     private JPanel controlPanel;
     private JPanel playerHandPanel;
-    private JPanel otherHandPanel; // Panel for dealer's hand
+    private JPanel otherHandPanel; // Panel 2
+    // for dealer's hand
     private JPanel scorePanel;
     private JPanel deckPanel; // Panel for the deck
     private JPanel currentCardPanel;
@@ -39,8 +44,13 @@ public class GraphicsAIO {
     private JPanel logo;
     private ImageIcon logoIcon;
     JPanel panelWithBackground;
-    public GraphicsAIO() {
+    public GraphicsAIO() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         prepareGUI();
+        try {
+            UIManager.setLookAndFeel( new FlatLightLaf() );
+        } catch( Exception ex ) {
+            System.err.println( "Failed to initialize LaF" );
+        }
         icons = new ImageIcon[16];
         icons[0] = createImageIcon("/images/back.png", "Java");
         icons[1] = createImageIcon("/images/cardn2.png", "Java");
@@ -79,8 +89,7 @@ public class GraphicsAIO {
 
         JLabel numPlayersLabel = new JLabel("Number of Players:");
         numPlayersField = new JTextField();
-        JLabel targetScoreLabel = new JLabel("Target Score:");
-        targetScoreField = new JTextField();
+
 
         startButton = new JButton("Start Game");
         startButton.addActionListener(new ActionListener() {
@@ -92,8 +101,7 @@ public class GraphicsAIO {
 
         startScreenPanel.add(numPlayersLabel);
         startScreenPanel.add(numPlayersField);
-        startScreenPanel.add(targetScoreLabel);
-        startScreenPanel.add(targetScoreField);
+
         startScreenPanel.add(new JLabel()); // Empty label for spacing
         startScreenPanel.add(startButton);
 
@@ -106,7 +114,7 @@ public class GraphicsAIO {
     private void startGame() {
         // Retrieve values from text fields
         int numPlayers = Integer.parseInt(numPlayersField.getText());
-        int targetScore = Integer.parseInt(targetScoreField.getText());
+
         System.out.println("START GAME HAS BEEN RUN");
         players = new Player[numPlayers];
         for (int i = 0; i < players.length; i++) players[i] = new Player();
@@ -119,21 +127,32 @@ public class GraphicsAIO {
         otherHandPanel.setLayout(new GridLayout(players.length - 1, 1));
         mainFrame.add(otherHandPanel);
         otherHandPanel.setPreferredSize(new Dimension(300, 400)); // Adjust dimensions as needed
+        BufferedImage image = null;
+        try {image = ImageIO.read(new File("images/stroud.png")); System.out.println("file read I hope");}
+        catch(Exception e) {
+            System.out.println("oopsie woopsies I made a fucky wucky");
+        }
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight
+                = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.BOTH;
 
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
+        panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
+        mainFrame.add(panel, gbc);
         mainFrame.add(scoreboard.getScorePanel());
         mainFrame.revalidate();
         mainFrame.repaint();
     }
 
     private void prepareGUI() {
-        logoIcon = createImageIcon("/images/logo.jpg", "Java");
-        panelWithBackground = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                logoIcon.paintIcon(this, g, 0, 0);
-            }
-        };
+
         mainFrame = new JFrame("Skyjo");
         mainFrame.setSize(1620, 1080);
         mainFrame.setLayout(new GridBagLayout());
@@ -146,6 +165,7 @@ public class GraphicsAIO {
 
 
 
+
         currentCardPanel = new JPanel();
         currentCardPanel.setLayout(new FlowLayout());
         mainFrame.add(currentCardPanel);
@@ -155,7 +175,6 @@ public class GraphicsAIO {
 //        deckPanel.setLayout(new FlowLayout());
         deckPanel.setPreferredSize(new Dimension(100, 100));
         mainFrame.add(deckPanel);
-        mainFrame.getContentPane().add(panelWithBackground);
         mainFrame.setSize(800, 600);
         mainFrame.setVisible(true);
 
