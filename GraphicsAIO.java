@@ -10,6 +10,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.UIManager;
+
+import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 public class GraphicsAIO {
     private static JFrame mainFrame;
@@ -47,9 +49,9 @@ public class GraphicsAIO {
     public GraphicsAIO() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         prepareGUI();
         try {
-            UIManager.setLookAndFeel( new FlatLightLaf() );
-        } catch( Exception ex ) {
-            System.err.println( "Failed to initialize LaF" );
+            UIManager.setLookAndFeel(new FlatDarkLaf());
+        } catch (UnsupportedLookAndFeelException ex) {
+            System.err.println("Failed to initialize LaF: " + ex.getMessage());
         }
         icons = new ImageIcon[16];
         icons[0] = createImageIcon("/images/back.png", "Java");
@@ -83,6 +85,24 @@ public class GraphicsAIO {
         logo.setLayout(new FlowLayout());
         logo.add(new JLabel(logoIcon));
         logo.setPreferredSize(new Dimension(200, 200));
+        BufferedImage image = null;
+        try {image = ImageIO.read(new File("images/logo.jpeg")); System.out.println("file read I hope");}
+        catch(Exception e) {
+            System.out.println("oopsie woopsies I made a fucky wucky");
+        }
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.gridheight
+                = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.BOTH;
+
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+
+        TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
+        panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
 
         startScreenPanel = new JPanel();
         startScreenPanel.setLayout(new GridLayout(3, 2));
@@ -107,6 +127,7 @@ public class GraphicsAIO {
 
         mainFrame.add(startScreenPanel);
         mainFrame.setSize(300, 400);
+        //mainFrame.add(panel, gbc);
         mainFrame.revalidate();
         mainFrame.repaint();
     }
@@ -128,7 +149,7 @@ public class GraphicsAIO {
         mainFrame.add(otherHandPanel);
         otherHandPanel.setPreferredSize(new Dimension(300, 400)); // Adjust dimensions as needed
         BufferedImage image = null;
-        try {image = ImageIO.read(new File("images/stroud.png")); System.out.println("file read I hope");}
+        try {image = ImageIO.read(new File("images/logo.jpeg")); System.out.println("file read I hope");}
         catch(Exception e) {
             System.out.println("oopsie woopsies I made a fucky wucky");
         }
@@ -142,11 +163,20 @@ public class GraphicsAIO {
 
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
+        GridBagConstraints gbcScoreboard = new GridBagConstraints();
+        gbcScoreboard.gridx = 0; // Start at the first column
+        gbcScoreboard.gridy = GridBagConstraints.RELATIVE; // Place below the previous component
+        gbcScoreboard.gridwidth = GridBagConstraints.REMAINDER; // Span across all columns
+        gbcScoreboard.fill = GridBagConstraints.HORIZONTAL; // Fill the entire width
+        gbcScoreboard.anchor = GridBagConstraints.PAGE_END;
+        gbcScoreboard.weighty = 1.0; // Give the panel weight to push other components up
 
         TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
         panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
         mainFrame.add(panel, gbc);
-        mainFrame.add(scoreboard.getScorePanel());
+        scoreboard.getScorePanel().setVisible(true);
+        mainFrame.add(scoreboard.getScorePanel(), gbcScoreboard);
+        mainFrame.setComponentZOrder(scoreboard.getScorePanel(), mainFrame.getComponentCount());
         mainFrame.revalidate();
         mainFrame.repaint();
     }
