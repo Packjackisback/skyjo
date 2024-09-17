@@ -10,9 +10,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 import javax.swing.UIManager;
-
 import com.formdev.flatlaf.FlatDarkLaf;
-import com.formdev.flatlaf.FlatLightLaf;
 public class GraphicsAIO {
     private static JFrame mainFrame;
     private JLabel headerLabel;
@@ -45,7 +43,7 @@ public class GraphicsAIO {
     private boolean flipTime = false;
     private JPanel logo;
     private ImageIcon logoIcon;
-    JPanel panelWithBackground;
+    private int lastTurn;
     public GraphicsAIO() throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         prepareGUI();
         try {
@@ -85,11 +83,11 @@ public class GraphicsAIO {
         logo.setLayout(new FlowLayout());
         logo.add(new JLabel(logoIcon));
         logo.setPreferredSize(new Dimension(200, 200));
-        BufferedImage image = null;
-        try {image = ImageIO.read(new File("images/logo.jpeg")); System.out.println("file read I hope");}
-        catch(Exception e) {
-            System.out.println("oopsie woopsies I made a fucky wucky");
-        }
+        //BufferedImage image = null;
+        //try {image = ImageIO.read(new File("images/logo.jpeg")); System.out.println("file read I hope");}
+        //catch(Exception e) {
+         //   System.out.println("oopsie woopsies I made a fucky wucky");
+        //}
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -101,8 +99,8 @@ public class GraphicsAIO {
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
 
-        TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
-        panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
+        //TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
+        //panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
 
         startScreenPanel = new JPanel();
         startScreenPanel.setLayout(new GridLayout(3, 2));
@@ -151,7 +149,7 @@ public class GraphicsAIO {
         BufferedImage image = null;
         try {image = ImageIO.read(new File("images/logo.jpeg")); System.out.println("file read I hope");}
         catch(Exception e) {
-            System.out.println("oopsie woopsies I made a fucky wucky");
+            System.out.println("oopsie woopsies I made a wucky");
         }
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -165,18 +163,26 @@ public class GraphicsAIO {
         gbc.weighty = 1.0;
         GridBagConstraints gbcScoreboard = new GridBagConstraints();
         gbcScoreboard.gridx = 0; // Start at the first column
-        gbcScoreboard.gridy = GridBagConstraints.RELATIVE; // Place below the previous component
+        gbcScoreboard.gridy = 1; // Adjust this value as needed
         gbcScoreboard.gridwidth = GridBagConstraints.REMAINDER; // Span across all columns
         gbcScoreboard.fill = GridBagConstraints.HORIZONTAL; // Fill the entire width
-        gbcScoreboard.anchor = GridBagConstraints.PAGE_END;
-        gbcScoreboard.weighty = 1.0; // Give the panel weight to push other components up
+        gbcScoreboard.anchor = GridBagConstraints.LINE_END; // Anchor to the bottom
+        gbcScoreboard.weighty = 2.0; // Increase the weight to give it more vertical space
 
-        TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
-        panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
-        mainFrame.add(panel, gbc);
-        scoreboard.getScorePanel().setVisible(true);
+// Add the scoreboard with the adjusted constraints
         mainFrame.add(scoreboard.getScorePanel(), gbcScoreboard);
-        mainFrame.setComponentZOrder(scoreboard.getScorePanel(), mainFrame.getComponentCount());
+
+// Set the scoreboard's z-order to prioritize it
+        //mainFrame.setComponentZOrder(scoreboard.getScorePanel(), mainFrame.getComponentCount() - 1);
+
+
+
+        mainFrame.setSize(1620, 1080);
+        //TiledBackgroundPanel panel = new TiledBackgroundPanel(image);
+        //panel.setPreferredSize(new Dimension(mainFrame.getWidth(), mainFrame.getHeight()));
+        //mainFrame.add(panel, gbc);
+        scoreboard.getScorePanel().setVisible(true);
+
         mainFrame.revalidate();
         mainFrame.repaint();
     }
@@ -255,14 +261,7 @@ public class GraphicsAIO {
         }
         renderHand(players[currentPlayer].getPlayerHand().getHand(), playerHandPanel, playerHandButtons);
         renderOtherHands();
-        /*TODO Add scoring
-                How should I do that
-                Score after every round
-                I need to check if the array is all flipped
-                if it is I need to somehow remind it to call roundend next time
-        *
 
-        */
     }
     public boolean isArrayFlipped(ArrayList<ArrayList<Card>> cardArrayList) {
         for (ArrayList<Card> row : cardArrayList) {
@@ -395,6 +394,7 @@ public class GraphicsAIO {
         return score;
     }
     private void roundOver() {
+
         int[] highest = {currentPlayer, score(players[currentPlayer].getPlayerHand().getHand())};
         for (int i =0;i<players.length;i++) {
             Player p=players[i];
@@ -404,8 +404,10 @@ public class GraphicsAIO {
             }
             p.setPlayerScore(p.getPlayerScore()+score(p.getPlayerHand().getHand()));
             scoreboard.updateScore(i, p.getPlayerScore());
+            int lowest[] = {Integer.MAX_VALUE, 0};
+            for (int i2 =0;i2<players.length;i2++) if(players[i2].getPlayerScore()<lowest[0]) { lowest[0] = players[i2].getPlayerScore(); lowest[1] = i2;}
             if (p.getPlayerScore() >= 100)
-                System.exit(0); // Replace with game over
+                JOptionPane.showMessageDialog(mainFrame, "Player " + lowest[1] + " has won with a score of " + lowest[0] + "\n Thank you for playing Stroudjo!"); // Replace with game over
 
         }
         if(currentPlayer==highest[1]) {
@@ -418,6 +420,7 @@ public class GraphicsAIO {
             flipTwoRandomElements(cP.getPlayerHand().getHand());
         }
         renderHand(players[currentPlayer].getPlayerHand().getHand(), playerHandPanel, playerHandButtons);
+        lastTurn = Integer.MAX_VALUE;
     }
     private void nextPlayer() {
         if(currentPlayer!=players.length-1) {
@@ -427,6 +430,8 @@ public class GraphicsAIO {
         System.out.println(currentPlayer);
         renderHand(players[currentPlayer].getPlayerHand().getHand(), playerHandPanel, playerHandButtons);
         renderOtherHands();
+        mainFrame.repaint();
+        mainFrame.revalidate();
     }
     private void handleCardClick(int row, int col, int playerIndex) {
         Card cardInHand = players[playerIndex].getPlayerHand().getHand().get(row).get(col);
@@ -491,7 +496,7 @@ public class GraphicsAIO {
 
         // Check rows
         for (int row = 0; row < copy.size(); row++) {
-            int firstValue = copy.get(row).getFirst().getValue();
+            int firstValue = copy.get(row).get(0).getValue();
             boolean stop = true;
             for (int i = 1; i < copy.get(row).size(); i++) {
                 if (copy.get(row).get(i).getValue() != firstValue || !copy.get(row).get(i).isFlipped()) {
@@ -504,8 +509,8 @@ public class GraphicsAIO {
         }
 
         // Check columns
-        for (int col = 0; col < matrix.getFirst().size(); col++) {
-            int firstValue = matrix.getFirst().get(col).getValue();
+        for (int col = 0; col < matrix.get(0).size(); col++) {
+            int firstValue = matrix.get(0).get(col).getValue();
             boolean stop = true;
             for (int row = 1; row < matrix.size(); row++) {
                 if (matrix.get(row).get(col).getValue() != firstValue || !copy.get(row).get(col).isFlipped()) {
@@ -529,7 +534,8 @@ public class GraphicsAIO {
         handPanel.removeAll();
         hasIdenticalElements(hand);
         if(isArrayFlipped(hand)) {
-            roundOver();
+            if(lastTurn!=currentPlayer) lastTurn=currentPlayer;
+            else roundOver();
             return;
         }
         for (int i = 0; i < hand.size(); i++) {
@@ -543,8 +549,8 @@ public class GraphicsAIO {
 
                 handButtons[i][j].setIcon(cardIcon);
                 // Update listener to reference current player
-                int finalI = i;
-                int finalJ = j;
+                final int finalI = i;
+                final int finalJ = j;
                 for(ActionListener a : handButtons[i][j].getActionListeners()) {
                     handButtons[i][j].removeActionListener(a);
                 }

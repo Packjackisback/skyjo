@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Skyjo:jar2">
+    <output-path>$PROJECT_DIR$/out/artifacts/Skyjo_jar2</output-path>
+    <root id="archive" name="Skyjo.jar">
+      <element id="module-output" name="Skyjo" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/flatlaf-3.5.1.jar" path-in-jar="/" />
+      <element id="file-copy" path="$PROJECT_DIR$/flatlaf-3.5.1.jar" />
+    </root>
+  </artifact>
+</component>
